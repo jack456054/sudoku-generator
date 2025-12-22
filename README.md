@@ -77,5 +77,4 @@ poetry run python scripts/check.py
 *   難度判斷是基於人類解題技巧，而非單純的空格數量。
 *   Hard 難度的題目生成較為耗時，因為需要隨機嘗試直到出現 X-Wing 結構，若嘗試次數過多系統會自動返回當前找到最難的題目。
 
----
-Created by Antigravity
+
