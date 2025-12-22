@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Generator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .controls h1 {
+            margin-top: 0;
+        }
+
+        .puzzle-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .sudoku-grid {
+            border-collapse: collapse;
+            border: 2px solid #000;
+            margin-bottom: 20px;
+        }
+
+        .sudoku-grid td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 18px;
+        }
+
+        /* Thick borders for 3x3 boxes */
+        .sudoku-grid td:nth-child(3n) {
+            border-right: 2px solid #000;
+        }
+
+        .sudoku-grid tr:nth-child(3n) td {
+            border-bottom: 2px solid #000;
+        }
+
+        /* Remove outer double borders */
+        .sudoku-grid td:last-child {
+            border-right: 1px solid #ccc;
+        }
+
+        .sudoku-grid tr:last-child td {
+            border-bottom: 1px solid #ccc;
+        }
+
+        .puz-wrapper {
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .puz-title {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        @media print {
+            .controls {
+                display: none;
+            }
+
+            .puzzle-container {
+                display: block;
+            }
+
+            .puz-wrapper {
+                display: inline-block;
+                vertical-align: top;
+                margin: 10px 20px;
+            }
+
+            .page-break {
+                page-break-before: always;
+                display: block;
+                height: 1px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <h1>Sudoku Generator</h1>
+        <label>Difficulty:
+            <select id="diff">
+                <option value="Simple">Simple</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+        </label>
+        <label>Count: <input type="number" id="count" value="4" min="1" max="20"></label>
+        <button onclick="generate()">Generate</button>
+        <button onclick="window.print()">Print</button>
+    </div>
+
+    <div class="puzzle-container" id="container"></div>
+
+    <script>
+        async function generate() {
+            const container = document.getElementById('container');
+            const diff = document.getElementById('diff').value;
+            const count = document.getElementById('count').value;
+
+            container.innerHTML = 'Generating...';
+
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ difficulty: diff, count: count })
+                });
+                const data = await res.json();
+
+                container.innerHTML = '';
+
+                // 1. Render Puzzles
+                data.puzzles.forEach((p, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'puz-wrapper';
+
+                    const title = document.createElement('div');
+                    title.className = 'puz-title';
+                    title.textContent = `Puzzle ${idx + 1} (${p.grade})`;
+                    wrapper.appendChild(title);
+
+                    const table = createGrid(p.board);
+                    wrapper.appendChild(table);
+                    container.appendChild(wrapper);
+                });
+
+                // 2. Page Break
+                const pageBreak = document.createElement('div');
+                pageBreak.className = 'page-break';
+                container.appendChild(pageBreak);
+
+                // 3. Render Answer Key Header
+                const ansHeader = document.createElement('center');
+                ansHeader.innerHTML = '<h1>Answer Key</h1>';
+                container.appendChild(ansHeader);
+
+                // 4. Render Solutions
+                data.puzzles.forEach((p, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'puz-wrapper';
+
+                    const title = document.createElement('div');
+                    title.className = 'puz-title';
+                    title.textContent = `Solution ${idx + 1}`;
+                    wrapper.appendChild(title);
+
+                    const table = createGrid(p.solution);
+                    wrapper.appendChild(table);
+                    container.appendChild(wrapper);
+                });
+
+            } catch (e) {
+                container.innerHTML = 'Error generating puzzles.';
+                console.error(e);
+            }
+        }
+
+        function createGrid(board) {
+            const table = document.createElement('table');
+            table.className = 'sudoku-grid';
+            board.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell === 0 ? '' : cell;
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            return table;
+        }
+    </script>
+</body>
+
+</html>

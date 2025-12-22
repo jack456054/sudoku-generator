@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "sudoku-generator"
+version = "0.1.0"
+description = "A logical Sudoku generator and solver"
+authors = ["Your Name <you@example.com>"]
+packages = [{include = "sudoku", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.1.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+
+[tool.poetry.scripts]
+sudoku = "sudoku.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
