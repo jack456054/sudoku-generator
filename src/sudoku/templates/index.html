@@ -5,92 +5,348 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sudoku Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+        }
+
         body {
-            font-family: sans-serif;
-            padding: 20px;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px;
+            color: #333;
         }
 
         .controls {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f0f0f0;
-            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
 
         .controls h1 {
             margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 700;
         }
 
+        .control-group {
+            display: inline-flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        select,
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            font-family: inherit;
+        }
+
+        button.btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        button.btn-success {
+            background-color: var(--success-color);
+            color: white;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin-top: 30px;
+            display: none;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 24px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Default Screen Styles for Grid */
         .puzzle-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 40px;
+            gap: 30px;
             justify-content: center;
+            padding: 20px;
+        }
+
+        .print-page {
+            /* On screen: Card look */
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 10mm;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 40px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid-8up {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(4, 1fr);
+            flex: 1;
+            width: 100%;
+            border-top: 1px dashed #999;
+            border-left: 1px dashed #999;
+        }
+
+        .puz-wrapper {
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px dashed #999;
+            border-bottom: 1px dashed #999;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .puz-title {
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #333;
         }
 
         .sudoku-grid {
             border-collapse: collapse;
-            border: 2px solid #000;
-            margin-bottom: 20px;
+            border: 2px solid #333;
+            margin: 0 auto;
         }
 
         .sudoku-grid td {
             width: 30px;
             height: 30px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             text-align: center;
             vertical-align: middle;
-            font-size: 18px;
+            font-size: 16px;
+            color: #333;
+            padding: 0;
         }
 
-        /* Thick borders for 3x3 boxes */
         .sudoku-grid td:nth-child(3n) {
-            border-right: 2px solid #000;
+            border-right: 2px solid #333;
         }
 
         .sudoku-grid tr:nth-child(3n) td {
-            border-bottom: 2px solid #000;
+            border-bottom: 2px solid #333;
         }
 
-        /* Remove outer double borders */
         .sudoku-grid td:last-child {
-            border-right: 1px solid #ccc;
+            border-right: 1px solid #ddd;
         }
 
         .sudoku-grid tr:last-child td {
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid #ddd;
         }
 
-        .puz-wrapper {
-            text-align: center;
-            page-break-inside: avoid;
+        .page-header {
+            display: none;
+            /* Hide answer key header on screen */
         }
 
-        .puz-title {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
+        /* PRINT STYLES */
         @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                padding: 0;
+                background-color: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
             .controls {
                 display: none;
             }
 
             .puzzle-container {
                 display: block;
+                padding: 0;
+            }
+
+            .print-page {
+                width: 210mm;
+                height: 297mm;
+                padding: 10mm;
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .print-page:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .page-header {
+                display: block;
+                text-align: center;
+                margin-bottom: 5mm;
+            }
+
+            .page-header h1 {
+                font-size: 18px;
+                margin: 0;
+            }
+
+            /* Dashed Lines for Print */
+            .grid-8up {
+                border-color: #000;
             }
 
             .puz-wrapper {
-                display: inline-block;
-                vertical-align: top;
-                margin: 10px 20px;
+                border-color: #000;
             }
 
-            .page-break {
-                page-break-before: always;
-                display: block;
-                height: 1px;
+            /* Print Scaling for Sudoku Grid */
+            .sudoku-grid {
+                border: 2px solid #000 !important;
+            }
+
+            .sudoku-grid td {
+                width: 22px !important;
+                height: 22px !important;
+                font-size: 12px !important;
+                border: 1px solid #666 !important;
+            }
+
+            .sudoku-grid td:nth-child(3n) {
+                border-right: 2px solid #000 !important;
+            }
+
+            .sudoku-grid tr:nth-child(3n) td {
+                border-bottom: 2px solid #000 !important;
+            }
+
+            .sudoku-grid td:last-child {
+                border-right: 1px solid #666 !important;
+            }
+
+            .sudoku-grid tr:last-child td {
+                border-bottom: 1px solid #666 !important;
+            }
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 850px) {
+            .print-page {
+                width: 100%;
+                height: auto;
+            }
+
+            .grid-8up {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 20px;
+                border: none;
+            }
+
+            .puz-wrapper {
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                margin-bottom: 20px;
             }
         }
     </style>
@@ -99,16 +355,37 @@
 <body>
     <div class="controls">
         <h1>Sudoku Generator</h1>
-        <label>Difficulty:
-            <select id="diff">
-                <option value="Simple">Simple</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-            </select>
-        </label>
-        <label>Count: <input type="number" id="count" value="4" min="1" max="20"></label>
-        <button onclick="generate()">Generate</button>
-        <button onclick="window.print()">Print</button>
+
+        <div class="control-group">
+            <div class="input-group">
+                <label for="diff">Difficulty:</label>
+                <select id="diff">
+                    <option value="Simple">Simple</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="count">Count:</label>
+                <input type="number" id="count" value="4" min="1" max="20">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <button class="btn-primary" onclick="generate()">Generate Puzzles</button>
+            <button class="btn-success" onclick="window.print()">Print Page</button>
+        </div>
+
+        <div class="progress-wrapper" id="progress-wrapper">
+            <div class="progress-header">
+                <span id="progress-text">Preparing...</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
     </div>
 
     <div class="puzzle-container" id="container"></div>
@@ -119,61 +396,136 @@
             const diff = document.getElementById('diff').value;
             const count = document.getElementById('count').value;
 
-            container.innerHTML = 'Generating...';
+            const progressWrapper = document.getElementById('progress-wrapper');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const progressPercent = document.getElementById('progress-percent');
+
+            container.innerHTML = '';
+            progressWrapper.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            progressText.textContent = 'Starting...';
 
             try {
-                const res = await fetch('/api/generate', {
+                const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ difficulty: diff, count: count })
                 });
-                const data = await res.json();
 
-                container.innerHTML = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let puzzles = [];
+                let buffer = '';
 
-                // 1. Render Puzzles
-                data.puzzles.forEach((p, idx) => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'puz-wrapper';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
 
-                    const title = document.createElement('div');
-                    title.className = 'puz-title';
-                    title.textContent = `Puzzle ${idx + 1} (${p.grade})`;
-                    wrapper.appendChild(title);
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
 
-                    const table = createGrid(p.board);
-                    wrapper.appendChild(table);
-                    container.appendChild(wrapper);
-                });
+                    // Process all complete lines
+                    buffer = lines.pop(); // Keep the last partial line
 
-                // 2. Page Break
-                const pageBreak = document.createElement('div');
-                pageBreak.className = 'page-break';
-                container.appendChild(pageBreak);
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const data = JSON.parse(line);
 
-                // 3. Render Answer Key Header
-                const ansHeader = document.createElement('center');
-                ansHeader.innerHTML = '<h1>Answer Key</h1>';
-                container.appendChild(ansHeader);
+                        // Update Progress
+                        const pct = Math.round((data.progress / data.total) * 100);
+                        progressBar.style.width = pct + '%';
+                        progressPercent.textContent = pct + '%';
+                        progressText.textContent = `Generated ${data.progress} of ${data.total}`;
 
-                // 4. Render Solutions
-                data.puzzles.forEach((p, idx) => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'puz-wrapper';
+                        puzzles.push(data.puzzle);
+                    }
+                }
 
-                    const title = document.createElement('div');
-                    title.className = 'puz-title';
-                    title.textContent = `Solution ${idx + 1}`;
-                    wrapper.appendChild(title);
+                // Done reading
+                progressText.textContent = 'Completed!';
+                progressPercent.textContent = '100%';
+                progressBar.style.width = '100%';
 
-                    const table = createGrid(p.solution);
-                    wrapper.appendChild(table);
-                    container.appendChild(wrapper);
-                });
+                // Render Puzzles
+                renderPuzzles(puzzles);
 
             } catch (e) {
                 container.innerHTML = 'Error generating puzzles.';
                 console.error(e);
+                progressText.textContent = 'Error occurred.';
+            }
+        }
+
+        function renderPuzzles(puzzles) {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+
+            const chunkSize = 8;
+
+            // Helper to create page structure
+            function createPage(items, isSolution, pageIndex, totalPages) {
+                const page = document.createElement('div');
+                page.className = 'print-page';
+
+                // Add header if Solution Page 1
+                if (isSolution && pageIndex === 0) {
+                    const header = document.createElement('div');
+                    header.className = 'page-header';
+                    header.innerHTML = '<h1>Answer Key</h1>';
+                    page.appendChild(header);
+                }
+
+                const grid = document.createElement('div');
+                grid.className = 'grid-8up';
+
+                items.forEach((p, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'puz-wrapper';
+
+                    const title = document.createElement('div');
+                    title.className = 'puz-title';
+                    const globalIdx = (pageIndex * chunkSize) + idx + 1;
+
+                    if (isSolution) {
+                        title.textContent = `Solution ${globalIdx}`;
+                    } else {
+                        title.textContent = `Puzzle ${globalIdx} (${p.grade})`;
+                    }
+
+                    wrapper.appendChild(title);
+
+                    const boardData = isSolution ? p.solution : p.board;
+                    const table = createGrid(boardData);
+                    wrapper.appendChild(table);
+
+                    grid.appendChild(wrapper);
+                });
+
+                // Fill remaining slots to maintain grid lines? 
+                // If we want full grid lines even for empty slots, we need to add empty divs.
+                const remaining = chunkSize - items.length;
+                for (let i = 0; i < remaining; i++) {
+                    const empty = document.createElement('div');
+                    empty.className = 'puz-wrapper'; // Adds borders
+                    grid.appendChild(empty);
+                }
+
+                page.appendChild(grid);
+                container.appendChild(page);
+            }
+
+            // 1. Chunk Puzzles
+            for (let i = 0; i < puzzles.length; i += chunkSize) {
+                const chunk = puzzles.slice(i, i + chunkSize);
+                createPage(chunk, false, i / chunkSize, Math.ceil(puzzles.length / chunkSize));
+            }
+
+            // 2. Chunk Solutions
+            for (let i = 0; i < puzzles.length; i += chunkSize) {
+                const chunk = puzzles.slice(i, i + chunkSize);
+                createPage(chunk, true, i / chunkSize, Math.ceil(puzzles.length / chunkSize));
             }
         }
 

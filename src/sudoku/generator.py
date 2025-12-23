@@ -62,14 +62,26 @@ class SudokuGenerator:
             
             if current_level > target_level:
                 puzzle[r][c] = removed_num # Too hard
-            elif current_level == target_level:
-                return puzzle, grade, full_board # Exact match, stop
-        
-            # Keep track of best candidate if we don't hit target exactly
-            if current_level <= target_level and diff_levels[grade] > diff_levels.get(best_grade, 'Simple'):
+            
+            # If current_level <= target_level, we keep the number removed (it's valid).
+            # We want to continue to make it sparser.
+            
+            # However, we only consider it a "success" for the specific difficulty if it matches exactly.
+            if current_level == target_level:
+                 # Found a valid candidate for our target.
+                 # Store it, but DO NOT stop. We want to remove more if possible.
                  best_grade = grade
                  best_puzzle = copy.deepcopy(puzzle)
-                 best_solution = full_board # Store corresponding solution
+                 best_solution = full_board
+            
+            # If current_level < target_level (e.g. have Simple, want Medium), we keep removing 
+            # in hopes it becomes Medium.
+            
+            # Maintain the "best we found so far" logic from before, but prioritized.
+            if best_puzzle is None:
+                 # Backup: if we never hit target, keep the hardest one below target?
+                 # Or just whatever we have.
+                 pass
 
         # After loop, return puzzle. If we are here, we finished the board without hitting target exactly 
         # (or loop finished).

@@ -2,12 +2,13 @@
 name = "sudoku-generator"
 version = "0.1.0"
 description = "A logical Sudoku generator and solver"
-authors = ["Your Name <you@example.com>"]
+authors = ["jack456054 <jack456054@hotmail.com>"]
 packages = [{include = "sudoku", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 flask = "^3.1.2"
+gunicorn = "^23.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"
